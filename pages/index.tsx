@@ -53,6 +53,8 @@ const Home: NextPage = () => {
   useEffect(() => {
     if (mnemonicData) {
       setValue("mnemonic", mnemonicData.mnemonic);
+    } else {
+      setValue("mnemonic", "");
     }
   }, [mnemonicData]);
 

@@ -18,15 +18,20 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const address = keystore.getAddresses().at(0);
       const serializedKeystore = keystore.serialize();
+      const now = Date.now();
 
-      fs.writeFile("wallet.json", serializedKeystore, function (error) {
-        if (error) {
-          res.json({ ok: false, message: "실패" });
-        } else {
-          console.log("address = ", address);
-          res.json({ ok: true, address });
+      fs.writeFile(
+        `createdWallets/wallet_${now}.json`,
+        serializedKeystore,
+        function (error) {
+          if (error) {
+            res.json({ ok: false, message: error.message });
+          } else {
+            console.log("address = ", address);
+            res.json({ ok: true, address });
+          }
         }
-      });
+      );
     });
   });
 }
