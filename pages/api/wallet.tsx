@@ -21,9 +21,10 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
 
       fs.writeFile("wallet.json", serializedKeystore, function (error) {
         if (error) {
-          res.json({ message: "실패" });
+          res.json({ ok: false, message: "실패" });
         } else {
-          res.json({ address });
+          console.log("address = ", address);
+          res.json({ ok: true, address });
         }
       });
     });
