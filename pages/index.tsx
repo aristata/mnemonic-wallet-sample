@@ -21,6 +21,7 @@ interface WalletMutationResult {
 const Home: NextPage = () => {
   const [
     mnemonic,
+    mnemonicReset,
     { loading: mnemonicLoading, data: mnemonicData, error: mnemonicError }
   ] = useMutation<MnemonicMutationResult>("/api/mnemonic");
 
@@ -30,6 +31,7 @@ const Home: NextPage = () => {
 
   const [
     wallet,
+    walletReset,
     { loading: walletLoading, data: walletData, error: walletError }
   ] = useMutation<WalletMutationResult>("/api/wallet");
 
@@ -50,14 +52,25 @@ const Home: NextPage = () => {
     console.error(errors);
   };
 
+  const resetAll = () => {
+    walletReset();
+    mnemonicReset();
+  };
+
   return (
     <div className="py-5 px-10">
-      <div className="border-b-2 border-dashed py-2">
+      <div className="border-b-2 border-dashed py-2 space-x-2">
         <button
           className="bg-red-300 rounded-3xl text-white font-bold text-3xl px-12 py-10"
           onClick={createMnemonic}
         >
-          generate mnemonic
+          니모닉 생성
+        </button>
+        <button
+          className="bg-green-300 rounded-3xl text-white font-bold text-3xl px-12 py-10"
+          onClick={resetAll}
+        >
+          새로 만들기
         </button>
       </div>
       {mnemonicData?.ok ? (
@@ -111,7 +124,7 @@ const Home: NextPage = () => {
           </button>
         </form>
       </div>
-      {walletData?.ok ? (
+      {!walletData ? null : walletData.ok ? (
         <div className="py-2 border-b-2 border-dashed space-x-2">
           <label className="flex items-center">
             생성된 지갑
@@ -135,7 +148,7 @@ const Home: NextPage = () => {
       ) : (
         <div className="py-2 border-b-2 border-dashed space-x-2">
           <label className="flex items-center">
-            지갑 생성 실패 메세지
+            메세지
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-6 w-6 px-1"

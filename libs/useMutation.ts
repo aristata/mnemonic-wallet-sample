@@ -6,7 +6,11 @@ interface UseMutationState<T> {
   error?: object;
 }
 
-type UseMutationResult<T> = [(data?: any) => void, UseMutationState<T>];
+type UseMutationResult<T> = [
+  (data?: any) => void,
+  () => void,
+  UseMutationState<T>
+];
 
 export default function useMutation<T = any>(
   url: string
@@ -30,5 +34,12 @@ export default function useMutation<T = any>(
       .catch((error) => setState((prev) => ({ ...prev, error })))
       .finally(() => setState((prev) => ({ ...prev, loading: false })));
   }
-  return [mutation, { ...state }];
+  function reset() {
+    setState({
+      loading: false,
+      data: undefined,
+      error: undefined
+    });
+  }
+  return [mutation, reset, { ...state }];
 }
