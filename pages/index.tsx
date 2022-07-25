@@ -2,6 +2,7 @@ import useMutation from "@libs/useMutation";
 import type { NextPage } from "next";
 import { useEffect, useState } from "react";
 import { useForm, FieldErrorsImpl } from "react-hook-form";
+import { SaveWalletResponse } from "@api/db/saveWallet";
 
 interface MnemonicMutationResult {
   ok: boolean;
@@ -25,16 +26,19 @@ interface WalletList {
 }
 
 const Home: NextPage = () => {
+  // state
   const [walletList, setWalletList] = useState<WalletList[]>([]);
+  const [formData, setFormData] = useState<WalletCreateForm>({
+    mnemonic: "",
+    password: ""
+  });
+
+  // mutation
   const [
     mnemonic,
     mnemonicReset,
     { loading: mnemonicLoading, data: mnemonicData, error: mnemonicError }
   ] = useMutation<MnemonicMutationResult>("/api/mnemonic");
-
-  const createMnemonic = () => {
-    mnemonic();
-  };
 
   const [
     wallet,
@@ -42,6 +46,13 @@ const Home: NextPage = () => {
     { loading: walletLoading, data: walletData, error: walletError }
   ] = useMutation<WalletMutationResult>("/api/wallet");
 
+  const [
+    saveWallet,
+    saveWalletReset,
+    { loading: saveWalletLoading, data: saveWalletData, error: saveWalletError }
+  ] = useMutation<SaveWalletResponse>("/api/db/saveWallet");
+
+  // form
   const {
     register,
     handleSubmit,
@@ -50,6 +61,12 @@ const Home: NextPage = () => {
     setValue
   } = useForm<WalletCreateForm>();
 
+  // 니모닉 생성 함수
+  const createMnemonic = () => {
+    mnemonic();
+  };
+
+  // 니모닉이 생성되면, 폼에 니모닉을 자동으로 입력한다
   useEffect(() => {
     if (mnemonicData) {
       setValue("mnemonic", mnemonicData.mnemonic);
@@ -58,17 +75,16 @@ const Home: NextPage = () => {
     }
   }, [mnemonicData]);
 
-  const [formData, setFormData] = useState<WalletCreateForm>({
-    mnemonic: "",
-    password: ""
-  });
+  // 폼 서브밋 (=지갑 생성 요청)
   const onValid = (data: WalletCreateForm) => {
-    wallet(data);
-    setFormData(data);
+    setFormData(data); // 지갑 생성 후 디비 저장을 위해 스테이트에 폼 데이터를 저장
+    wallet(data); // 지갑 생성
   };
 
+  // 지갑 생성 후 동작
   useEffect(() => {
     if (walletData?.ok) {
+      // 지갑 목록 스테이트에 데이터 저장 => TODO: 지갑 목록 조회 기능 구현 후 삭제
       setWalletList((prev) => [
         ...prev,
         {
@@ -76,8 +92,15 @@ const Home: NextPage = () => {
           address: walletData?.address ? walletData?.address : ""
         }
       ]);
+
+      // 디비에 데이터 저장
+      saveWallet({
+        address: walletData?.address,
+        password: formData.password,
+        mnemonic: formData.mnemonic
+      });
     }
-  }, [formData, walletData]);
+  }, [walletData]);
 
   const onInvalid = (errors: FieldErrorsImpl) => {
     console.error(errors);
