@@ -1,8 +1,11 @@
-import useMutation from "@libs/useMutation";
 import type { NextPage } from "next";
 import { useEffect, useState } from "react";
 import { useForm, FieldErrorsImpl } from "react-hook-form";
+import useMutation from "@libs/useMutation";
+import useFatch from "@libs/useFatch";
 import { SaveWalletResponse } from "@api/db/saveWallet";
+import { GetWalletsResponse } from "@api/db/getWallets";
+import { Wallet } from "@prisma/client";
 
 interface MnemonicMutationResult {
   ok: boolean;
@@ -20,14 +23,9 @@ interface WalletMutationResult {
   address?: string;
 }
 
-interface WalletList {
-  walletCreateForm: WalletCreateForm;
-  address: string;
-}
-
 const Home: NextPage = () => {
   // state
-  const [walletList, setWalletList] = useState<WalletList[]>([]);
+  const [walletList, setWalletList] = useState<Wallet[]>([]);
   const [formData, setFormData] = useState<WalletCreateForm>({
     mnemonic: "",
     password: ""
@@ -46,11 +44,16 @@ const Home: NextPage = () => {
     { loading: walletLoading, data: walletData, error: walletError }
   ] = useMutation<WalletMutationResult>("/api/wallet");
 
+  // fatch
   const [
     saveWallet,
-    saveWalletReset,
     { loading: saveWalletLoading, data: saveWalletData, error: saveWalletError }
-  ] = useMutation<SaveWalletResponse>("/api/db/saveWallet");
+  ] = useFatch<SaveWalletResponse>("POST", "/api/db/saveWallet");
+
+  const [
+    getWallets,
+    { loading: getWalletLoading, data: getWalletsData, error: getWalletError }
+  ] = useFatch<GetWalletsResponse>("GET", "/api/db/getWallets");
 
   // form
   const {
@@ -84,23 +87,29 @@ const Home: NextPage = () => {
   // 지갑 생성 후 동작
   useEffect(() => {
     if (walletData?.ok) {
-      // 지갑 목록 스테이트에 데이터 저장 => TODO: 지갑 목록 조회 기능 구현 후 삭제
-      setWalletList((prev) => [
-        ...prev,
-        {
-          walletCreateForm: formData,
-          address: walletData?.address ? walletData?.address : ""
-        }
-      ]);
-
       // 디비에 데이터 저장
       saveWallet({
         address: walletData?.address,
         password: formData.password,
         mnemonic: formData.mnemonic
       });
+
+      // 디비에서 목록 조회
+      setTimeout(() => {
+        getWallets();
+      }, 500);
     }
   }, [walletData]);
+
+  useEffect(() => {
+    getWallets();
+  }, []);
+
+  useEffect(() => {
+    if (getWalletsData?.ok) {
+      setWalletList(getWalletsData.result);
+    }
+  }, [getWalletsData]);
 
   const onInvalid = (errors: FieldErrorsImpl) => {
     console.error(errors);
@@ -231,22 +240,34 @@ const Home: NextPage = () => {
             <table className="table-auto border-collapse border border-slate-500">
               <thead>
                 <tr>
+                  <td className="border border-slate-500">아이디</td>
                   <td className="border border-slate-500">지갑 주소</td>
                   <td className="border border-slate-500">지갑 비밀번호</td>
                   <td className="border border-slate-500">지갑 니모닉</td>
+                  <td className="border border-slate-500">생성일시</td>
+                  <td className="border border-slate-500">수정일시</td>
                 </tr>
               </thead>
               <tbody>
                 {walletList.map((wallet, index) => (
                   <tr key={index}>
                     <td className="border border-slate-500">
-                      {wallet.address}
+                      {wallet.id.toString()}
                     </td>
                     <td className="border border-slate-500">
-                      {wallet.walletCreateForm.password}
+                      {wallet.walletAddress}
                     </td>
                     <td className="border border-slate-500">
-                      {wallet.walletCreateForm.mnemonic}
+                      {wallet.walletPassword}
+                    </td>
+                    <td className="border border-slate-500">
+                      {wallet.walletMnemonic}
+                    </td>
+                    <td className="border border-slate-500">
+                      {wallet.createdAt.toString()}
+                    </td>
+                    <td className="border border-slate-500">
+                      {wallet.updatedAt.toString()}
                     </td>
                   </tr>
                 ))}
