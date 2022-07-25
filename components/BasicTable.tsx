@@ -16,8 +16,14 @@ export const BasicTable = () => {
     data
   });
 
-  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
-    tableInstance;
+  const {
+    getTableProps,
+    getTableBodyProps,
+    headerGroups,
+    footerGroups,
+    rows,
+    prepareRow
+  } = tableInstance;
 
   return (
     <table {...getTableProps()} className="w-full">
@@ -57,6 +63,20 @@ export const BasicTable = () => {
           );
         })}
       </tbody>
+      <tfoot>
+        {footerGroups.map((footerGroup) => (
+          <tr {...footerGroup.getFooterGroupProps()}>
+            {footerGroup.headers.map((column) => (
+              <td
+                {...column.getFooterProps()}
+                className="py-3 text-center bg-green-500 text-white border border-white p-2"
+              >
+                {column.render("Footer")}
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tfoot>
     </table>
   );
 };
