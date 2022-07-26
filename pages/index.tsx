@@ -6,6 +6,9 @@ import useFatch from "@libs/useFatch";
 import { SaveWalletResponse } from "@api/db/saveWallet";
 import { GetWalletsResponse } from "@api/db/getWallets";
 import { Wallet } from "@prisma/client";
+import DataTable, { Alignment, Direction } from "react-data-table-component";
+import { walletTableColumns } from "@components/WalletTableColumns";
+import SubHeaderComponent from "@components/SubHeaderComponent";
 
 interface MnemonicMutationResult {
   ok: boolean;
@@ -236,43 +239,17 @@ const Home: NextPage = () => {
       <div className="py-2 space-x-2">
         {walletList.length > 0 ? (
           <div>
-            <h3>생성된 지갑 목록</h3>
-            <table className="table-auto border-collapse border border-slate-500">
-              <thead>
-                <tr>
-                  <td className="border border-slate-500">아이디</td>
-                  <td className="border border-slate-500">지갑 주소</td>
-                  <td className="border border-slate-500">지갑 비밀번호</td>
-                  <td className="border border-slate-500">지갑 니모닉</td>
-                  <td className="border border-slate-500">생성일시</td>
-                  <td className="border border-slate-500">수정일시</td>
-                </tr>
-              </thead>
-              <tbody>
-                {walletList.map((wallet, index) => (
-                  <tr key={index}>
-                    <td className="border border-slate-500">
-                      {wallet.id.toString()}
-                    </td>
-                    <td className="border border-slate-500">
-                      {wallet.walletAddress}
-                    </td>
-                    <td className="border border-slate-500">
-                      {wallet.walletPassword}
-                    </td>
-                    <td className="border border-slate-500">
-                      {wallet.walletMnemonic}
-                    </td>
-                    <td className="border border-slate-500">
-                      {wallet.createdAt.toString()}
-                    </td>
-                    <td className="border border-slate-500">
-                      {wallet.updatedAt.toString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <DataTable
+              columns={walletTableColumns}
+              data={walletList}
+              title="지갑 목록"
+              fixedHeader
+              fixedHeaderScrollHeight="300px"
+              highlightOnHover
+              pagination
+              pointerOnHover
+              striped
+            />
           </div>
         ) : (
           <>
