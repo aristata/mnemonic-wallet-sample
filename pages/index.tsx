@@ -1,12 +1,16 @@
 import type { NextPage } from "next";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm, FieldErrorsImpl } from "react-hook-form";
 import useMutation from "@libs/useMutation";
 import useFatch from "@libs/useFatch";
 import { SaveWalletResponse } from "@api/db/saveWallet";
 import { GetWalletsResponse } from "@api/db/getWallets";
 import { Wallet } from "@prisma/client";
-import DataTable, { Alignment, Direction } from "react-data-table-component";
+import DataTable, {
+  Alignment,
+  Direction,
+  TableRow
+} from "react-data-table-component";
 import { walletTableColumns } from "@components/WalletTableColumns";
 import SubHeaderComponent from "@components/SubHeaderComponent";
 
@@ -122,6 +126,10 @@ const Home: NextPage = () => {
     reset();
     walletReset();
     mnemonicReset();
+  };
+
+  const handleRowClicked = (row: Wallet, event: React.MouseEvent) => {
+    setValue("mnemonic", row.walletMnemonic);
   };
 
   return (
@@ -249,6 +257,7 @@ const Home: NextPage = () => {
               pagination
               pointerOnHover
               striped
+              onRowClicked={handleRowClicked}
             />
           </div>
         ) : (
