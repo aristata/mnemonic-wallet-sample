@@ -15,12 +15,17 @@ export const walletTableColumns: TableColumn<Wallet>[] = [
   {
     name: "walletPassword",
     selector: (row) => row.walletPassword,
-    width: "150px",
+    width: "200px",
     center: true
   },
   {
     name: "walletMnemonic",
     selector: (row) => row.walletMnemonic
+  },
+  {
+    name: "note",
+    selector: (row) => (row.note ? row.note : ""),
+    width: "200px"
   },
   {
     name: "createdAt",

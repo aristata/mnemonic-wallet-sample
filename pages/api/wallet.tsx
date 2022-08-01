@@ -9,7 +9,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
   const vaultOption: VaultOptions = {
     password: password,
     seedPhrase: mnemonic,
-    hdPathString: "m/0'/0'/0'"
+    hdPathString: "m/44'/60'/0'/0"
   };
 
   lightWallet.keystore.createVault(vaultOption, function (error, keystore) {

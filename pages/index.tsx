@@ -13,6 +13,7 @@ import DataTable, {
 } from "react-data-table-component";
 import { walletTableColumns } from "@components/WalletTableColumns";
 import SubHeaderComponent from "@components/SubHeaderComponent";
+import { cls } from "@libs/utils";
 
 interface MnemonicMutationResult {
   ok: boolean;
@@ -22,6 +23,7 @@ interface MnemonicMutationResult {
 interface WalletCreateForm {
   mnemonic: string;
   password: string;
+  note?: string;
 }
 
 interface WalletMutationResult {
@@ -35,8 +37,10 @@ const Home: NextPage = () => {
   const [walletList, setWalletList] = useState<Wallet[]>([]);
   const [formData, setFormData] = useState<WalletCreateForm>({
     mnemonic: "",
-    password: ""
+    password: "",
+    note: ""
   });
+  const [mode, setMode] = useState<"create" | "update">("create");
 
   // mutation
   const [
@@ -74,6 +78,7 @@ const Home: NextPage = () => {
   // 니모닉 생성 함수
   const createMnemonic = () => {
     mnemonic();
+    setMode("create");
   };
 
   // 니모닉이 생성되면, 폼에 니모닉을 자동으로 입력한다
@@ -98,8 +103,11 @@ const Home: NextPage = () => {
       saveWallet({
         address: walletData?.address,
         password: formData.password,
-        mnemonic: formData.mnemonic
+        mnemonic: formData.mnemonic,
+        note: formData.note
       });
+
+      setMode("update");
 
       // 디비에서 목록 조회
       setTimeout(() => {
@@ -126,26 +134,38 @@ const Home: NextPage = () => {
     reset();
     walletReset();
     mnemonicReset();
+    setMode("create");
   };
 
+  // 지갑 목록에서 로우 클릭시
   const handleRowClicked = (row: Wallet, event: React.MouseEvent) => {
+    setMode("update");
     setValue("mnemonic", row.walletMnemonic);
+    setValue("password", row.walletPassword);
+    setValue("note", row.note ? row.note : "");
   };
 
   return (
     <div className="py-5 px-10">
       <div className="border-b-2 border-dashed py-2 space-x-2">
         <button
-          className="bg-red-300 rounded-3xl text-white font-bold text-3xl px-12 py-10"
+          className="bg-green-300 rounded-3xl text-white font-bold text-3xl px-12 py-10"
           onClick={createMnemonic}
         >
           니모닉 생성
         </button>
         <button
-          className="bg-green-300 rounded-3xl text-white font-bold text-3xl px-12 py-10"
+          className="bg-yellow-200 rounded-3xl text-white font-bold text-3xl px-12 py-10"
           onClick={resetAll}
         >
           새로 만들기
+        </button>
+        <button
+          type="submit"
+          form="form"
+          className="bg-red-300 rounded-3xl text-white font-bold text-3xl p-10 max-w-sm"
+        >
+          지갑 생성 및 수정
         </button>
         {mnemonicData?.ok ? (
           <div className="py-2 space-x-2">
@@ -174,30 +194,32 @@ const Home: NextPage = () => {
       <div className="border-b-2 border-dashed py-2 space-x-2">
         <form
           className="flex flex-col space-y-2"
+          id="form"
           onSubmit={handleSubmit(onValid, onInvalid)}
         >
           <input
-            className="max-w-xl"
+            className={cls(mode === "update" ? "bg-gray-300" : "")}
             type={"text"}
             placeholder="니모닉을 입력하세요"
             {...register("mnemonic", {
               required: "니모닉을 입력하세요"
             })}
+            disabled={mode === "update" ? true : false}
           />
           <input
-            className="max-w-xl"
+            className=""
             type={"password"}
             placeholder="비밀번호를 입력하세요"
             {...register("password", {
               required: "비밀번호를 입력하세요"
             })}
           />
-          <button
-            type="submit"
-            className="bg-red-300 rounded-3xl text-white font-bold text-3xl p-10 max-w-sm"
-          >
-            지갑 생성
-          </button>
+          <input
+            className=""
+            type={"text"}
+            placeholder="note"
+            {...register("note")}
+          />
         </form>
         {!walletData ? null : walletData.ok ? (
           <div className="py-2 border-b-2 border-dashed space-x-2">
