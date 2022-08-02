@@ -9,23 +9,30 @@ export const walletTableColumns: TableColumn<Wallet>[] = [
     width: "fit-content"
   },
   {
-    name: "walletAddress",
-    selector: (row) => row.walletAddress
+    name: "note",
+    selector: (row) => (row.note ? row.note : ""),
+    width: "150px"
   },
   {
     name: "walletPassword",
     selector: (row) => row.walletPassword,
-    width: "200px",
-    center: true
+    width: "150px"
+  },
+  {
+    name: "walletAddress",
+    selector: (row) => row.walletAddress,
+    width: "350px"
+  },
+
+  {
+    name: "walletPrivateKey",
+    selector: (row) => row.walletPrivateKey,
+    width: "500px"
   },
   {
     name: "walletMnemonic",
-    selector: (row) => row.walletMnemonic
-  },
-  {
-    name: "note",
-    selector: (row) => (row.note ? row.note : ""),
-    width: "200px"
+    selector: (row) => row.walletMnemonic,
+    width: "500px"
   },
   {
     name: "createdAt",

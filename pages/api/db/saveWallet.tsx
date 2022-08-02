@@ -12,13 +12,14 @@ async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ResponseType>
 ) {
-  const { address, password, mnemonic, note } = req.body;
+  const { address, password, privateKey, mnemonic, note } = req.body;
 
   try {
     const walletOutput = await client.wallet.upsert({
       create: {
         walletAddress: address,
         walletPassword: password,
+        walletPrivateKey: privateKey,
         walletMnemonic: mnemonic,
         note: note
       },

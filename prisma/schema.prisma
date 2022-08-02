@@ -13,11 +13,12 @@ datasource db {
 }
 
 model Wallet {
-  id             Int      @id @default(autoincrement())
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  walletAddress  String   @unique
-  walletPassword String
-  walletMnemonic String   @unique
-  note           String?  @db.MediumText
+  id               Int      @id @default(autoincrement())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  walletAddress    String   @unique
+  walletPassword   String
+  walletPrivateKey String   @unique
+  walletMnemonic   String   @unique
+  note             String?  @db.MediumText
 }

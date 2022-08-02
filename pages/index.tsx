@@ -23,6 +23,8 @@ interface MnemonicMutationResult {
 interface WalletCreateForm {
   mnemonic: string;
   password: string;
+  address?: string;
+  privateKey?: string;
   note?: string;
 }
 
@@ -30,6 +32,7 @@ interface WalletMutationResult {
   ok: boolean;
   message?: string;
   address?: string;
+  privateKey?: string;
 }
 
 const Home: NextPage = () => {
@@ -38,6 +41,8 @@ const Home: NextPage = () => {
   const [formData, setFormData] = useState<WalletCreateForm>({
     mnemonic: "",
     password: "",
+    address: "",
+    privateKey: "",
     note: ""
   });
   const [mode, setMode] = useState<"create" | "update">("create");
@@ -101,8 +106,11 @@ const Home: NextPage = () => {
     if (walletData?.ok) {
       // 디비에 데이터 저장
       saveWallet({
-        address: walletData?.address,
+        address: walletData?.address ? walletData?.address : formData.address,
         password: formData.password,
+        privateKey: walletData?.privateKey
+          ? walletData?.privateKey
+          : formData.privateKey,
         mnemonic: formData.mnemonic,
         note: formData.note
       });
@@ -142,61 +150,89 @@ const Home: NextPage = () => {
     setMode("update");
     setValue("mnemonic", row.walletMnemonic);
     setValue("password", row.walletPassword);
+    setValue("address", row.walletAddress);
+    setValue("privateKey", row.walletPrivateKey);
     setValue("note", row.note ? row.note : "");
   };
 
   return (
     <div className="py-5 px-10">
-      <div className="border-b-2 border-dashed py-2 space-x-2">
+      {/* 버튼 영역 */}
+      <div className="border-b-2 border-black border-dashed space-x-2 py-2 flex items-center">
         <button
-          className="bg-green-300 rounded-3xl text-white font-bold text-3xl px-12 py-10"
+          className="bg-green-300 rounded-3xl text-white font-bold text-3xl px-12 py-10 hover:bg-green-400"
           onClick={createMnemonic}
         >
           니모닉 생성
         </button>
         <button
-          className="bg-yellow-200 rounded-3xl text-white font-bold text-3xl px-12 py-10"
-          onClick={resetAll}
-        >
-          새로 만들기
-        </button>
-        <button
           type="submit"
           form="form"
-          className="bg-red-300 rounded-3xl text-white font-bold text-3xl p-10 max-w-sm"
+          className="bg-red-300 rounded-3xl text-white font-bold text-3xl px-12 py-10 hover:bg-red-400"
         >
           지갑 생성 및 수정
         </button>
-        {mnemonicData?.ok ? (
-          <div className="py-2 space-x-2">
-            <label className="flex items-center">
-              생성된 니모닉
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6 px-1"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M17 8l4 4m0 0l-4 4m4-4H3"
-                />
-              </svg>
-            </label>
-            <span>{mnemonicData.mnemonic}</span>
-          </div>
-        ) : null}
+        <button
+          className="bg-amber-300 rounded-3xl text-white px-12 py-10 hover:bg-amber-400"
+          onClick={resetAll}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-10 h-9"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={3}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+            />
+          </svg>
+        </button>
       </div>
 
-      <div className="border-b-2 border-dashed py-2 space-x-2">
+      {/* 폼 영역 */}
+      <div className="border-b-2 border-black border-dashed space-x-2 py-2">
         <form
           className="flex flex-col space-y-2"
           id="form"
           onSubmit={handleSubmit(onValid, onInvalid)}
         >
+          <label>노트</label>
+          <input
+            className=""
+            type={"text"}
+            placeholder="note"
+            {...register("note")}
+          />
+          <label>비밀번호</label>
+          <input
+            className=""
+            type={"text"}
+            placeholder="비밀번호를 입력하세요"
+            {...register("password", {
+              required: "비밀번호를 입력하세요"
+            })}
+          />
+          <label>공개키</label>
+          <input
+            className={cls(mode === "update" ? "bg-gray-300" : "")}
+            type={"text"}
+            placeholder="공개키"
+            {...register("address")}
+            disabled={mode === "update" ? true : false}
+          />
+          <label>비밀키</label>
+          <input
+            className={cls(mode === "update" ? "bg-gray-300" : "")}
+            type={"text"}
+            placeholder="비밀키"
+            {...register("privateKey")}
+            disabled={mode === "update" ? true : false}
+          />
+          <label>니모닉</label>
           <input
             className={cls(mode === "update" ? "bg-gray-300" : "")}
             type={"text"}
@@ -206,67 +242,11 @@ const Home: NextPage = () => {
             })}
             disabled={mode === "update" ? true : false}
           />
-          <input
-            className=""
-            type={"password"}
-            placeholder="비밀번호를 입력하세요"
-            {...register("password", {
-              required: "비밀번호를 입력하세요"
-            })}
-          />
-          <input
-            className=""
-            type={"text"}
-            placeholder="note"
-            {...register("note")}
-          />
         </form>
-        {!walletData ? null : walletData.ok ? (
-          <div className="py-2 border-b-2 border-dashed space-x-2">
-            <label className="flex items-center">
-              생성된 지갑
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6 px-1"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M17 8l4 4m0 0l-4 4m4-4H3"
-                />
-              </svg>
-            </label>
-            <span>{walletData.address}</span>
-          </div>
-        ) : (
-          <div className="py-2 border-b-2 border-dashed space-x-2">
-            <label className="flex items-center">
-              메세지
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6 px-1"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M17 8l4 4m0 0l-4 4m4-4H3"
-                />
-              </svg>
-            </label>
-            <span>{walletData?.message}</span>
-          </div>
-        )}
       </div>
 
-      <div className="py-2 space-x-2">
+      {/* 목록 영역 */}
+      <div className="space-x-2 py-2">
         {walletList.length > 0 ? (
           <div>
             <DataTable

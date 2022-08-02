@@ -17,6 +17,10 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
       keystore.generateNewAddress(pwDerivedKey, 1);
 
       const address = keystore.getAddresses().at(0);
+      const privateKey = keystore.exportPrivateKey(
+        address!.toString(),
+        pwDerivedKey
+      );
       const serializedKeystore = keystore.serialize();
       const now = Date.now();
 
@@ -28,7 +32,8 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
             res.json({ ok: false, message: error.message });
           } else {
             console.log("address = ", address);
-            res.json({ ok: true, address });
+            console.log("privateKey = ", privateKey);
+            res.json({ ok: true, address, privateKey });
           }
         }
       );
