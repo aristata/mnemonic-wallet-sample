@@ -33,6 +33,7 @@ interface WalletMutationResult {
   message?: string;
   address?: string;
   privateKey?: string;
+  mnemonic?: string;
 }
 
 const Home: NextPage = () => {
@@ -82,8 +83,11 @@ const Home: NextPage = () => {
 
   // 니모닉 생성 함수
   const createMnemonic = () => {
+    // 기존 입력 폼은 초기화 한다
+    resetAll();
+
+    // 니모닉 생성
     mnemonic();
-    setMode("create");
   };
 
   // 니모닉이 생성되면, 폼에 니모닉을 자동으로 입력한다
@@ -91,7 +95,7 @@ const Home: NextPage = () => {
     if (mnemonicData) {
       setValue("mnemonic", mnemonicData.mnemonic);
     } else {
-      setValue("mnemonic", "");
+      setValue("mnemonic", walletData?.mnemonic ? walletData?.mnemonic : "");
     }
   }, [mnemonicData]);
 
@@ -200,48 +204,72 @@ const Home: NextPage = () => {
           id="form"
           onSubmit={handleSubmit(onValid, onInvalid)}
         >
-          <label>노트</label>
-          <input
-            className=""
-            type={"text"}
-            placeholder="note"
-            {...register("note")}
-          />
-          <label>비밀번호</label>
-          <input
-            className=""
-            type={"text"}
-            placeholder="비밀번호를 입력하세요"
-            {...register("password", {
-              required: "비밀번호를 입력하세요"
-            })}
-          />
-          <label>공개키</label>
-          <input
-            className={cls(mode === "update" ? "bg-gray-300" : "")}
-            type={"text"}
-            placeholder="공개키"
-            {...register("address")}
-            disabled={mode === "update" ? true : false}
-          />
-          <label>비밀키</label>
-          <input
-            className={cls(mode === "update" ? "bg-gray-300" : "")}
-            type={"text"}
-            placeholder="비밀키"
-            {...register("privateKey")}
-            disabled={mode === "update" ? true : false}
-          />
-          <label>니모닉</label>
-          <input
-            className={cls(mode === "update" ? "bg-gray-300" : "")}
-            type={"text"}
-            placeholder="니모닉을 입력하세요"
-            {...register("mnemonic", {
-              required: "니모닉을 입력하세요"
-            })}
-            disabled={mode === "update" ? true : false}
-          />
+          <div className="flex items-center justify-center">
+            <label className="w-1/12">노트</label>
+            <input
+              className="w-full"
+              type={"text"}
+              placeholder="노트는 "
+              {...register("note")}
+            />
+          </div>
+          <div className="flex items-center justify-center">
+            <label className="w-1/12">비밀번호</label>
+            <input
+              className="w-full"
+              type={"text"}
+              placeholder="비밀번호를 입력하세요"
+              {...register("password", {
+                required: "비밀번호를 입력하세요"
+              })}
+            />
+          </div>
+          <div className="flex items-center justify-center">
+            <label className="w-1/12">공개키</label>
+            <input
+              className={cls(
+                "w-full",
+                mnemonicData === undefined && mode !== "update"
+                  ? ""
+                  : "bg-gray-300"
+              )}
+              type={"text"}
+              placeholder="공개키"
+              {...register("address")}
+              disabled={
+                mnemonicData === undefined && mode !== "update" ? false : true
+              }
+            />
+          </div>
+          <div className="flex items-center justify-center">
+            <label className="w-1/12">비밀키</label>
+            <input
+              className={cls(
+                "w-full",
+                mnemonicData === undefined && mode !== "update"
+                  ? ""
+                  : "bg-gray-300"
+              )}
+              type={"text"}
+              placeholder="비밀키"
+              {...register("privateKey")}
+              disabled={
+                mnemonicData === undefined && mode !== "update" ? false : true
+              }
+            />
+          </div>
+          <div className="flex items-center justify-center">
+            <label className="w-1/12">니모닉</label>
+            <input
+              className={cls("w-full", mode === "update" ? "bg-gray-300" : "")}
+              type={"text"}
+              placeholder="니모닉을 입력하세요"
+              {...register("mnemonic", {
+                required: "니모닉을 입력하세요"
+              })}
+              disabled={mode === "update" ? true : false}
+            />
+          </div>
         </form>
       </div>
 

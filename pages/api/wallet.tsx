@@ -33,7 +33,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
           } else {
             console.log("address = ", address);
             console.log("privateKey = ", privateKey);
-            res.json({ ok: true, address, privateKey });
+            res.json({ ok: true, address, privateKey, mnemonic });
           }
         }
       );
