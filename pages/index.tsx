@@ -199,6 +199,9 @@ const Home: NextPage = () => {
 
       {/* 폼 영역 */}
       <div className="border-b-2 border-black border-dashed space-x-2 py-2">
+        <h2 className="font-medium text-xl p-2 h-14 flex items-center">
+          입력 폼
+        </h2>
         <form
           className="flex flex-col space-y-2"
           id="form"
